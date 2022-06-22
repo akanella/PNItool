@@ -1,0 +1,360 @@
+# Created on Wed Jun 22 16:08:37 2022
+# @author: Christian Doimo
+# This work is licensed under a CC0 1.0 license (https://creativecommons.org/publicdomain/zero/1.0/).
+
+<TextInput>:
+    multiline: False
+    write_tab: False
+    input_filter: 'float'
+    font_size: 12
+    size_hint_y: None
+    height: 27
+<Label>:
+    markup: True
+    font_size: 14
+    size_hint_y: None
+    height: 27
+
+<Button>
+    size_hint_y: None
+    height: 27
+
+<Spinner>:
+    size_hint_y: None
+    height: 27
+    sync_height : 27
+    background_color: 0, 0, 1
+
+<Mypopup>:
+    title: "Hello"
+    title_align: 'center'
+    auto_dismiss: False
+    size_hint: None, None
+    size: 400, 100
+    Button:
+        text: "Ok"
+        on_press: root.dismiss()
+
+<MyProgressBar>:
+    title: "Loading"
+    title_align: 'center'
+    auto_dismiss: False
+    size_hint: None, None
+    size: 700, 100
+    BoxLayout:
+        orientation: "vertical"
+        ProgressBar:
+            id: progress_id
+            value: 0
+            min: 0
+            max: 100
+
+<Simulation>
+    BoxLayout:
+        size: root.width, root.height
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.65
+            BoxLayout:
+                orientation: 'horizontal'
+                padding: 20
+                spacing: 10
+                size_hint_y: None
+                height: 67
+                canvas:
+                    Color:
+                        rgb : 1, 1, 1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        size_hint_x: 0.5
+                        text: 'J[size=20][sub]i[/sub][/size]'
+                        color: 0,0,0
+                    TextInput:
+                        id: ji
+                        text: '5.5'
+                        on_text_validate: root.creat_m_states()
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        size_hint_x: 0.5
+                        text: 'J[size=20][sub]f[/sub][/size]'
+                        color: 0,0,0
+                    TextInput:
+                        id: jf
+                        text: '1.5'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        size_hint_x: 0.5
+                        text: "\u03B4"
+                        color: 0,0,0
+                    TextInput:
+                        id: delta
+                        text: '0'
+            BoxLayout:
+                orientation: 'horizontal'
+                canvas:
+                    Color:
+                        rgb : 1, 1, 1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                BoxLayout:
+                    orientation: 'vertical'
+                    Label:
+                        text: 'a[size=20][sub]m[/sub][/size]'
+                        size_hint_y: 0.05
+                        color: 0,0,0,1
+                    FloatLayout:
+                        id: layout
+                    BoxLayout:
+                        orientation: 'vertical'
+                        padding: 8
+                        spacing: 4
+                        size_hint_y: 0.3
+                        Button:
+                            text: "Calculate"
+                            on_press: root.calculate_button()
+                        Button:
+                            text: "Simulation"
+                            on_press: root.simulation_button()
+                        Button:
+                            text: "Save"
+                            on_press: root.save_button()
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: 5
+                    spacing: 10
+                    Label:
+                        text: "Choose variable"
+                        color: 0,0,0
+                    Spinner:
+                        id : choose_variable_id
+                        text: "Alignment"
+                        values: ["Polarisation", "Alignment"]
+                    AnchorLayout:
+                        size_hint_y: None
+                        height: 40
+                    Label:
+                        text: "Choose curve function"
+                        color: 0,0,0
+                    Spinner:
+                        id : choose_curve_id
+                        text: "Exponential"
+                        values: ["Exponential", "Parabolic"]
+                    AnchorLayout:
+                        size_hint_y: None
+                        height: 45
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: None
+                        height: 27
+                        Label:
+                            text: "Value"
+                            color: 0,0,0
+                            size_hint_x: 0.5
+                        TextInput:
+                            id: value_id
+                            size_hint_x: 0.5
+                        Label:
+                            text: "[%]"
+                            color: 0,0,0
+                            size_hint_x: 0.5
+                    Button:
+                        text: "Generate a[size=20][sub]m[/sub][/size]"
+                        on_press: root.generate_am_button()
+                    AnchorLayout:
+
+        BoxLayout:
+            orientation: 'vertical'
+            AnchorLayout:
+                id: graph
+            AnchorLayout:
+                id: population
+        BoxLayout:
+            orientation: 'vertical'
+            AnchorLayout:
+                id: geometrie
+            BoxLayout:
+                orientation: "vertical"
+                canvas:
+                    Color:
+                        rgb : 1, 1, 1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding: 10
+                    spacing: 5
+                    BoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: 27
+                        Label:
+                            size_hint_x: 0.5
+                            text: "N"
+                            color: 0,0,0
+                        TextInput:
+                            id: N_label
+                            text: '100000'
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'd[size=20][sub]1[/sub][/size]'
+                            color: 0,0,0
+                        TextInput:
+                            id: d1_label
+                            size_hint_x: 0.5
+                            text: '11'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'd[size=20][sub]2[/sub][/size]'
+                            color: 0,0,0
+                        TextInput:
+                            id: d2_label
+                            size_hint_x: 0.5
+                            text: '14'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding: 10
+                    spacing: 5
+                    Label:
+                        text: "Dimension Phantom :"
+                        color: 0,0,0
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'H'
+                            color: 0,0,0
+                        TextInput:
+                            id: Hauteur_P
+                            size_hint_x: 0.5
+                            text: '3.2'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'L'
+                            color: 0,0,0
+                        TextInput:
+                            id: Longueur_P
+                            size_hint_x: 0.5
+                            text: '10.5'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding: 10
+                    spacing: 5
+                    Label:
+                        text: "Dimension Detector :"
+                        color: 0,0,0
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'H'
+                            color: 0,0,0
+                        TextInput:
+                            id: Hauteur_D
+                            size_hint_x: 0.5
+                            text: '0.7'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+                    BoxLayout:
+                        orientation: "horizontal"
+                        Label:
+                            size_hint_x: 0.4
+                            text: 'L'
+                            color: 0,0,0
+                        TextInput:
+                            id: Longueur_D
+                            size_hint_x: 0.5
+                            text: '3'
+                        Label:
+                            size_hint_x: 0.4
+                            text: '[cm]'
+                            color: 0,0,0
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding : 5
+                    Label:
+                        size_hint_y: 0.7
+                        text: 'N[size=20][sub]1[/sub][/size] ='
+                        color: 0,0,0
+                    TextInput:
+                        id: N1_label
+                        size_hint_x: 0.8
+                        readonly: True
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding : 5
+                    Label:
+                        size_hint_y: 0.7
+                        text: 'N[size=20][sub]2[/sub][/size] ='
+                        color: 0,0,0
+                    TextInput:
+                        id: N2_label
+                        size_hint_x: 0.8
+                        readonly: True
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding : 5
+                    Label:
+                        size_hint_y: 0.7
+                        text: "Probability of hitting detector 1 ="
+                        color: 0,0,0
+                    TextInput:
+                        id: ProbD1_label
+                        size_hint_x: 0.8
+                        readonly: True
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding : 5
+                    Label:
+                        size_hint_y: 0.7
+                        text: "Probability of hitting detector 2 ="
+                        color: 0,0,0
+                    TextInput:
+                        id: ProbD2_label
+                        size_hint_x: 0.8
+                        readonly: True
+                BoxLayout:
+                    orientation: "horizontal"
+                    padding: 5
+                    Label:
+                        size_hint_y: 0.7
+                        text: "Asymmetry ="
+                        color: 0,0,0
+                    TextInput:
+                        id: Asymetrie
+                        size_hint_x: 0.8
+                        readonly: True
+
