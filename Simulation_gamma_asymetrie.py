@@ -16,6 +16,7 @@ from sympy.physics.quantum.cg import CG
 from sympy.physics.wigner import racah
 from scipy.special import eval_legendre  
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
 def a_m_exponentiel(ji, value, choix = "Polarisation"):   
     m_state = np.arange(-ji,ji+1,1)
@@ -39,6 +40,7 @@ def a_m_exponentiel(ji, value, choix = "Polarisation"):
         try:
             s = float(sol)
         except:
+            # s = 0
             pass
         if s > 0:
             tau.append(- np.log(float(s)))
@@ -141,8 +143,11 @@ def calculate_polarisation(ji, a_m):
     return polarisation, alignment
 
 def plot_geometry(longeur_P, largeur_P, hauteur_D, diametre_D, distance_D1, distance_D2):
-    phantom_x = [-longeur_P / 2, longeur_P / 2, longeur_P / 2, -longeur_P / 2, -longeur_P / 2]
-    phantom_y = [largeur_P / 2, largeur_P / 2, -largeur_P / 2, -largeur_P / 2, largeur_P / 2]
+
+    if longeur_P == largeur_P: phantom_x = longeur_P/2
+    else: 
+        phantom_x = [-longeur_P / 2, longeur_P / 2, longeur_P / 2, -longeur_P / 2, -longeur_P / 2]
+        phantom_y = [largeur_P / 2, largeur_P / 2, -largeur_P / 2, -largeur_P / 2, largeur_P / 2]
 
     det1_x = [-hauteur_D / 2 + distance_D1, hauteur_D / 2 + distance_D1, hauteur_D / 2 + distance_D1,
               -hauteur_D / 2 + distance_D1, -hauteur_D / 2 + distance_D1]
@@ -153,10 +158,13 @@ def plot_geometry(longeur_P, largeur_P, hauteur_D, diametre_D, distance_D1, dist
     det2_x = [diametre_D / 2, diametre_D / 2, -diametre_D / 2, -diametre_D / 2, diametre_D / 2]
 
     fig, ax = plt.subplots(figsize=(6.4*1, 6.4*1))
-    plt.plot(phantom_x, phantom_y, label='Phantom')
-    plt.plot(det1_x, det1_y, 'r', label='Détecteur 1')
-    plt.plot(det2_x, det2_y, 'g', label='Détecteur 2')
-    plt.title("Géométrie")
+    if longeur_P == largeur_P:
+        circle = Circle((0., 0.), longeur_P, edgecolor='tab:blue', facecolor='none')
+        ax.add_patch(circle)
+    else: plt.plot(phantom_x, phantom_y, label='Phantom')
+    plt.plot(det1_x, det1_y, 'r', label='DetL')
+    plt.plot(det2_x, det2_y, 'g', label='DetT1')
+    # plt.title("Géométrie")
     plt.legend()
     plt.xlabel("cm")
     plt.ylabel("cm")
@@ -182,8 +190,13 @@ def simulation(N, distribution, longeur_P, largeur_P, hauteur_D, diametre_D, dis
     N2 = 0  # Nombre de photon détecté par le détecteur 2
 
     for coups in range(N):
-        x0 = random.randint(-int(longeur_P / 2), int(longeur_P / 2))
-        y0 = random.randint(-int(largeur_P / 2), int(largeur_P / 2))
+        if longeur_P == largeur_P:
+            r0 = random.randint(-int(longeur_P / 2), int(longeur_P / 2))
+            x0 = r0
+            y0 = r0
+        else :
+            x0 = random.randint(-int(longeur_P / 2), int(longeur_P / 2))
+            y0 = random.randint(-int(largeur_P / 2), int(largeur_P / 2))
         random_rads = random.choices(distribution.rads, distribution.w)
 
         pente = np.tan(random_rads)
@@ -214,70 +227,85 @@ ji = 11/2
 jf = 3/2
 delta = 0
 
-value = 0.18
+value = 1.
 
 population_0 = a_m_exponentiel(ji, 0, choix = "Alignement")   
-population = a_m_exponentiel(ji, value, choix = "Polarisation")             # Génère une population selon une expondentiel
-#population = a_m_parabole(ji, alignement)                                       # Génère une population selon une parabole
-
+# population = a_m_exponentiel(ji, value, choix = "Alignement")             # Génère une population selon une expondentiel
+# populationP = a_m_exponentiel(ji, value, choix = "Polarisation")             
+# populationL = a_m_parabole(ji, value)                                       # Génère une population selon une parabole
+population = a_m_parabole(ji, value)                                       # Génère une population selon une parabole
+# 
 #--------------------------------Calculs---------------------------------------
 dist_0 = calculate_distribution(ji, jf, delta, population_0.a_m0)
 distribution = calculate_distribution(ji, jf, delta, population.a_m0)
+# distributionP = calculate_distribution(ji, jf, delta, populationP.a_m0)
+# distributionL = calculate_distribution(ji, jf, delta, populationL.a_m0)
+
 
 #---------------------------------Plot-----------------------------------------
-
+print(calculate_polarisation(ji, [0.5, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.5]))
 #Plot population
 pop = [population]
 m = np.arange(-ji,ji+1,1)
+m_labels = []
+# print(5.5%1)
+# print(5%1)
+if m[0] % 1 != 0:
+    m_labels = ['{:.0f}/2'.format(x) for x in m*2]
+print(m_labels)
 for p in pop:
     for a_m in p:
         fig_population, ax_population = plt.subplots()
-        plt.bar(m, p[a_m])
-        polarisation, alignment = calculate_polarisation(ji, p[a_m])
-        plt.title('Polarisation = {:.2f}% | Alignement = {:.2f}%'.format(polarisation*100, alignment*100))
+        polarisation, alignment = calculate_polarisation(ji, p[a_m]) 
+        plt.bar(m, p[a_m], label="L = {:.2f}% | P = {:.2f}%".format(alignment*100, abs(polarisation)*100))
+        # plt.title('Polarisation = {:.2f}% | Aligne ment = {:.2f}%'.format(polarisation*100, alignment*100))
+        plt.legend()
         plt.ylim(0,1.05)
-        plt.xticks(m)
-
+        plt.xticks(m, m_labels)
+# print(distributionL)
 # Plot distribution
 fig_distribution, ax_distribution = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(8,6))
 plt.plot(dist_0.rads, dist_0.w, 'k--', label="L = 0% | P = 0%")
-plt.plot(distribution.rads, distribution.w, label="L = {:.2f}% | P = {:.2f}%".format(alignment*100, polarisation*100))
-plt.legend(bbox_to_anchor=(1.325, 1))
-plt.title("Distribution angulaire")
+plt.plot(distribution.rads, distribution.w, label="L = {:.2f}% | P = {:.2f}%".format(alignment*100, abs(polarisation)*100))
+# plt.plot(distributionP.rads, distributionP.w, label="L = {:.2f}% | P = {:.2f}%".format(0.0362*100, 0.30*100))
+# plt.plot(distributionL.rads, distributionL.w, label="L = {:.2f}% | P = {:.2f}%".format(0.30*100, 0.00*100))
+plt.legend(bbox_to_anchor=(1.3, 1.1))
+# plt.title("Distribution angulaire")
 
 #%%-------------------------Setup géométrie------------------------------------
 
 # Dimension phantom
-longeur_P = 10.5 #cm
-largeur_P = 3.2 #cm
+longeur_P = 1 #cm
+largeur_P = 1 #cm
 
 # Dimension détecteur
-diametre_D = 0.7 #cm
+diametre_D = 1 #cm
 hauteur_D = 3 #cm
-distance_D1 = 11 #cm
-distance_D2 = 14 #cm
+distance_D1 = 14.5 #cm
+distance_D2 = 12. #cm
 
 # Plot géométrie
 fig_geometrie, ax_geometrie = plot_geometry(longeur_P, largeur_P, hauteur_D, diametre_D, distance_D1, distance_D2)
 #%%---------------------------Simulation---------------------------------------
 
-N = 100000
-N1, N2 = simulation(N, distribution, longeur_P, largeur_P, hauteur_D, diametre_D, distance_D1, distance_D2)
-print("N1 = ", N1, "+/- {:.2f}" .format(np.sqrt(N1)))
-print("N2 = ", N2, "+/- {:.2f}" .format(np.sqrt(N2)))
-print("Probabilité de toucher le détecteur 1 = {:.2f}" .format((N1/N)*100),"+/- {:.2f}" .format(np.sqrt(N1)/N*100),"%")
-print("Probabilité de toucher le détecteur 2 = {:.2f}" .format((N2/N)*100),"+/- {:.2f}" .format(np.sqrt(N2)/N*100),"%")
-difference = (N1-N2)/(N1+N2)*100
-incertitude_diff = np.sqrt((2*N2/(N1+N2)**2)**2*N1+(-2*N1/(N1+N2)**2)**2*N2)*100
-print("Différence = {:.2f}" .format(difference),"+/- {:.2f}" .format(incertitude_diff),"%")
+# N = 100
+# N1, N2 = simulation(N, distribution, longeur_P, largeur_P, hauteur_D, diametre_D, distance_D1, distance_D2)
+# print("N1 = ", N1, "+/- {:.2f}" .format(np.sqrt(N1)))
+# print("N2 = ", N2, "+/- {:.2f}" .format(np.sqrt(N2)))
+# print("Probabilité de toucher le détecteur 1 = {:.2f}" .format((N1/N)*100),"+/- {:.2f}" .format(np.sqrt(N1)/N*100),"%")
+# print("Probabilité de toucher le détecteur 2 = {:.2f}" .format((N2/N)*100),"+/- {:.2f}" .format(np.sqrt(N2)/N*100),"%")
+# difference = (N1-N2)/(N1+N2)*100
+# incertitude_diff = np.sqrt((2*N2/(N1+N2)**2)**2*N1+(-2*N1/(N1+N2)**2)**2*N2)*100
+# print("Différence = {:.2f}" .format(difference),"+/- {:.2f}" .format(incertitude_diff),"%")
 
-# différence à 0% de polarisation et 0 % d'alignement = 5% donc :
-asymetrie = difference - 5
-print("Asymétrie = {:.2f}".format(asymetrie),"+/- {:.2f}" .format(incertitude_diff),"%")
+# # différence à 0% de polarisation et 0 % d'alignement = 5% donc :
+# asymetrie = difference
+# print("Asymétrie = {:.2f}".format(asymetrie),"+/- {:.2f}" .format(incertitude_diff),"%")
 
 #%%------------------------------Save------------------------------------------
 
+# fig_distribution.savefig("distribution.eps", format="eps")
+# fig_population.savefig("population.eps", format="eps")
 fig_distribution.savefig("distribution.png")
-fig_population.savefig("population.png")
 fig_geometrie.savefig("geometry.png")
-distribution.to_csv('data_distribution.csv')
+# distribution.to_csv('data_distribution.csv')
