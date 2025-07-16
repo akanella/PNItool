@@ -1,0 +1,6 @@
+pip install kivy[base] kivy_examples
+pip install matplotlib
+pip install six
+pip install pandas
+pip install sympy
+pip install scipy
